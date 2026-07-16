@@ -56,7 +56,8 @@ Parameters required for each script can be checked by running `./script_name.sh`
 #SBATCH --array=1-10%2
 ```
 This can usually be defined by the number of rows in the sample sheet e.g. `cat sample_sheet.txt | wc -l`
-* Run scripts in sequential order. After `script2_trimming.sh` create a new tab delimited sample sheet including paired trimmed fastq files and sample identifiers and save as a `.txt` file.
+* Run scripts in sequential order.
+* After `script2_trimming.sh` create a new tab delimited sample sheet including paired trimmed fastq files and sample identifiers and save as a `.txt` file.
 * Sample sheet should be three columns including: sample identifier followed by paired files as per the example below:
 ```
 sample_name  sample1_L001_R1_val_2.fastq.gz sample1_L001_R2_val_2.fastq.gz
