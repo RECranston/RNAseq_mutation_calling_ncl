@@ -46,7 +46,7 @@ sample_name  sample1_L001_R1.fastq.gz  sample1_L001_R2.fastq.gz
 ```
 
 ### Run the pipeline
-Parameters required for each script can be checked by running ./script_name.sh in the terminal:
+Parameters required for each script can be checked by running `./script_name.sh` in the terminal:
 * `<tab delimited sample sheet>` is the name of the sample sheet (`.txt` file) of fastq.gz file locations and associated sample names created during the setup stage.
 * `<input dir (relative)>` is the location of the directory containing input files relative to the current directory e.g. `trimmed_fastq/` (note the trailing “/”). 
 * Similarly `<output dir (relative)>` is the location of the directory where the output data is to be stored, relative to the current directory e.g. `vep_output/` (note the trailing “/”).
