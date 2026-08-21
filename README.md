@@ -8,7 +8,8 @@ The scripts include:
     * Creates vep caches
     * Builds STAR indexes
 * `script2_trimming.sh`:
-    * Trims sequencing adapters from paired fastq.gz files using Trim Galore
+    * Trims sequencing adapters from fastq.gz files using Trim Galore
+    * Hard-code `FORMAT` parameter in the script to `FORMAT=SINGLE_ENDED` for single ended reads, or `FORMAT=PAIRED_END` for paired end reads
     * Runs FastQC
 * `script3_align_twopass.sh`:
     * Performs STAR two-pass alignment on a paired list of trimmed fastq.gz files
@@ -40,9 +41,15 @@ chmod 777 *.sh
 sbatch ./script1_index_build.sh
 ```
 * Move all fastq.gz files for analysis (or symlink using `ln -s`) to a sub-directory within the current directory.
-* Create a tab-separated sample sheet of paired fastq files and sample identifiers and save as a `.txt` file. Sample sheet should be three columns including: sample identifier followed by paired files as per the example below:
+* Create a tab-separated sample sheet of fastq.gz files and sample identifiers and save as a `.txt` file. If paired end, the sample sheet should be three columns including sample identifier followed by paired files, if single ended, the sample sheet should be two columns including sample identifier followed by the fastq.gz file. Examples are shown below:  
+
+Paired end:
 ```
 sample_name  sample1_L001_R1.fastq.gz  sample1_L001_R2.fastq.gz
+```
+Single end:
+```
+sample_name  sample1_L001_R1.fastq.gz
 ```
 
 ### Run the pipeline
