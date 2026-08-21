@@ -28,6 +28,8 @@ The scripts include:
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
 * `script7_vep.sh`:
     * Annotation of filtered variants by vep.
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
+
   
 ### Setup
 
