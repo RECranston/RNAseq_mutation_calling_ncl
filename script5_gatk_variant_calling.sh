@@ -8,12 +8,12 @@
 #SBATCH --output=logs/gatk_var_calling_%A_%a.out
 #SBATCH --array=1-100%100
 
-# Script to run an array of gatk variant calling on file ids from a paired list of fastq files
+# Script to run an array of gatk variant calling on file ids from a list of fastq files
 # Ruth Cranston 2026
 
 [ $# -ne 3 ] && { echo -en \
 "\nRuth Cranston 2026\n\n
-*** Script to run gatk mutation calling on a list of sample ids from the original fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
+*** Script to run gatk mutation calling on a list of sample ids from the fastq.gz file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
 Runs in current directory. Input dir is location of gatk preprocessed files. Output directory is created.
 <sample sheet> <input dir (relative)> <output dir (relative)>
 example run: sbatch ./script5_gatk_variant_calling.sh sample_sheet.txt output_preprocessing/ output_mutation_calling/ *** \n\n" ; exit 1; }
@@ -22,12 +22,13 @@ example run: sbatch ./script5_gatk_variant_calling.sh sample_sheet.txt output_pr
 
 # Set variables
 BASE_DIR="$PWD"
-STAR_INDEX_DIR=${BASE_DIR}/"STAR_indexes/STAR_GRCh38"
+ASSEMBLY="GRCh37"
+STAR_INDEX_DIR=${BASE_DIR}/STAR_indexes/STAR_${ASSEMBLY}
+REFERENCE_DIR=${BASE_DIR}/References/${ASSEMBLY}
+
 SAMPLE_SHEET=$1
 INPUT_DIR=${BASE_DIR}/$2
 OUTPUT_DIR=${BASE_DIR}/$3
-REFERENCE_DIR=${BASE_DIR}/"References"
-
 
 # Load modules
 echo -en " * Loading modules...\n"
@@ -45,21 +46,34 @@ mkdir -p logs
 LINE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" ${SAMPLE_SHEET})
 
 SAMPLE_ID=$(echo $LINE | awk '{print $1}')
-FILE1=$(echo $LINE | awk '{print $2}')
-FILE2=$(echo $LINE | awk '{print $3}')
 
 echo "Processing sample: ${SAMPLE_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
+
+
+# Set reference files
+if [ "${ASSEMBLY}" == "GRCh38" ]; then
+    REF_FASTA=${REFERENCE_DIR}/Homo_sapiens_assembly38.fasta
+    GNOMAD=${REFERENCE_DIR}/af-only-gnomad.hg38.vcf.gz
+    PON=${REFERENCE_DIR}/1000g_pon.hg38.vcf.gz
+    EXAC=${REFERENCE_DIR}/small_exac_common_3.hg38.vcf.gz
+else
+    REF_FASTA=${REFERENCE_DIR}/Homo_sapiens_assembly19.fasta
+    GNOMAD=${REFERENCE_DIR}/af-only-gnomad.raw.sites.vcf
+    PON=${REFERENCE_DIR}/1000G_phase1.indels.b37.vcf
+    EXAC=${REFERENCE_DIR}/small_exac_common_3.vcf
+fi
+
 
 # Mutect2 (tumor-only mode)
 # --dont-use-soft-clipped-bases is important for RNA processing
 gatk Mutect2 \
      --java-options "-Xmx90g" \
-     -R ${REFERENCE_DIR}/Homo_sapiens_assembly38.fasta \
+     -R ${REF_FASTA} \
      -I ${INPUT_DIR}${SAMPLE_ID}_recal.bam \
      --tumor-sample ${SAMPLE_ID} \
-     --germline-resource ${REFERENCE_DIR}/af-only-gnomad.hg38.vcf.gz \
-     --panel-of-normals ${REFERENCE_DIR}/1000g_pon.hg38.vcf.gz \
+     --germline-resource ${GNOMAD} \
+     --panel-of-normals ${PON} \
      --dont-use-soft-clipped-bases \
      --f1r2-tar-gz ${OUTPUT_DIR}${SAMPLE_ID}_f1r2.tar.gz \
      -O ${OUTPUT_DIR}${SAMPLE_ID}_tumor_raw.vcf.gz
@@ -78,8 +92,8 @@ echo -ne "*** LearnReadOrientationModel finished! ***"
 gatk GetPileupSummaries \
     --java-options "-Xmx90g" \
     -I ${INPUT_DIR}${SAMPLE_ID}_recal.bam \
-    -V ${REFERENCE_DIR}/small_exac_common_3.hg38.vcf.gz \
-    -L ${REFERENCE_DIR}/small_exac_common_3.hg38.vcf.gz \
+    -V ${EXAC} \
+    -L ${EXAC} \
     -O ${OUTPUT_DIR}${SAMPLE_ID}_pileup_summaries.table
 
 gatk CalculateContamination \
@@ -92,7 +106,7 @@ echo -ne "*** CalculateContamination finished! ***"
 # Apply all filters
 gatk FilterMutectCalls \
      --java-options "-Xmx90g" \
-     -R ${REFERENCE_DIR}/Homo_sapiens_assembly38.fasta \
+     -R ${REF_FASTA} \
      -V ${OUTPUT_DIR}${SAMPLE_ID}_tumor_raw.vcf.gz \
      --ob-priors ${OUTPUT_DIR}${SAMPLE_ID}_artifact_prior.tar.gz \
      --contamination-table ${OUTPUT_DIR}${SAMPLE_ID}_contamination.table \
@@ -111,4 +125,3 @@ gatk SelectVariants \
 echo -ne "*** Extract PASS variants only finished! ***"
 
 echo -ne "*** All done! ***"
-
