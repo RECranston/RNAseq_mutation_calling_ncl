@@ -18,13 +18,14 @@ The scripts include:
 * `script4_gatk_preprocessing.sh`:
     * Performs gatk preprocessing on named files (names derived from sample sheet)
     * Preprocessing includes: Mark duplicates, Split reads at splice junctions (SplitNCigarReads), Base Quality Score Recalibration (BQSR) model building and application
-    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for alignment to GRCh37 genome build, or `ASSEMBLY=GRCh38` for alignment to GRCh38 genome build
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
 * `script5_gatk_variant_calling.sh`:
     * Performs mutation detection on named files (names derived from sample sheet) using Mutect2 in tumour-only mode, with comparison to the reference genome. Includes `--dont-use-soft-clipped-bases` which is important for excluding alignment noise in RNA-sequencing data.
     * Considers strand/orientation bias, sample contamination and filters variants accordingly. Also filters for PASS mutations (gatk SelectVariants)
-    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for alignment to GRCh37 genome build, or `ASSEMBLY=GRCh38` for alignment to GRCh38 genome build
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome buildd
 * `script6_rna_editing_filter.sh`:
     * Excludes RNA variants detected in RNA editing sites
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
 * `script7_vep.sh`:
     * Annotation of filtered variants by vep.
   
