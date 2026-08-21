@@ -16,8 +16,9 @@ The scripts include:
     * Hard-code `FORMAT` parameter in the script to `FORMAT=SINGLE_ENDED` for single ended reads, or `FORMAT=PAIRED_END` for paired end reads
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for alignment to GRCh37 genome build, or `ASSEMBLY=GRCh38` for alignment to GRCh38 genome build
 * `script4_gatk_preprocessing.sh`:
-    * Performs gatk preprocessing on named files (names derived from paired fastq.gz file sample sheet)
+    * Performs gatk preprocessing on named files (names derived from sample sheet)
     * Preprocessing includes: Mark duplicates, Split reads at splice junctions (SplitNCigarReads), Base Quality Score Recalibration (BQSR) model building and application
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for alignment to GRCh37 genome build, or `ASSEMBLY=GRCh38` for alignment to GRCh38 genome build
 * `script5_gatk_variant_calling.sh`:
     * Performs mutation detection on named files (names derived from paired fastq.gz file sample sheet) using Mutect2 in tumour-only mode, with comparison to the reference genome. Includes `--dont-use-soft-clipped-bases` which is important for excluding alignment noise in RNA-sequencing data.
     * Considers strand/orientation bias, sample contamination and filters variants accordingly. Also filters for PASS mutations (gatk SelectVariants)
