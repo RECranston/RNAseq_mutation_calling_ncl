@@ -24,12 +24,17 @@ example run: sbatch ./script3_align_twopass.sh trimmed_sample_sheet.txt test_tri
 
 # Set variables
 BASE_DIR="$PWD"
-STAR_INDEX_DIR=${BASE_DIR}/"STAR_indexes/STAR_GRCh38"
+ASSEMBLY="GRCh37"
+STAR_INDEX_DIR=${BASE_DIR}/STAR_indexes/STAR_${ASSEMBLY}
+
 SAMPLE_SHEET=$1
 INPUT_DIR=${BASE_DIR}/$2
 OUTPUT_DIR=${BASE_DIR}/$3
 PASS1_DIR=${OUTPUT_DIR}"PASS1/"
 PASS2_DIR=${OUTPUT_DIR}"PASS2/"
+
+# Set this to PAIRED_END or SINGLE_ENDED
+FORMAT=SINGLE_ENDED
 
 # Load modules
 echo -en " * Loading modules...\n"
@@ -49,11 +54,21 @@ LINE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" ${SAMPLE_SHEET})
 
 SAMPLE_ID=$(echo $LINE | awk '{print $1}')
 FILE1=$(echo $LINE | awk '{print $2}')
-FILE2=$(echo $LINE | awk '{print $3}')
+if [ "${FORMAT}" == "PAIRED_END" ]; then
+    FILE2=$(echo $LINE | awk '{print $3}')
+fi
 
 echo "Processing sample: ${SAMPLE_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
+echo "Format: ${FORMAT}"
 
+
+if [ "${FORMAT}" == "PAIRED_END" ]; then
+    READS_IN="${INPUT_DIR}${FILE1} ${INPUT_DIR}${FILE2}"
+else
+    READS_IN="${INPUT_DIR}${FILE1}"
+fi
+ 
 # Run STAR pass 1
 STAR --runMode alignReads \
      --runThreadN ${SLURM_CPUS_PER_TASK} \
@@ -65,21 +80,25 @@ STAR --runMode alignReads \
      --outSAMattributes NH HI AS NM MD \
      --outBAMcompression 9 \
      --genomeLoad NoSharedMemory \
-     --readFilesIn ${INPUT_DIR}${FILE1} ${INPUT_DIR}${FILE2}
-
+     --readFilesIn ${READS_IN}
+ 
 echo -ne "*** STAR pass 1 done! ***"
-
+ 
 # Run STAR pass 2
 STAR --runMode alignReads \
      --runThreadN ${SLURM_CPUS_PER_TASK} \
      --genomeDir ${STAR_INDEX_DIR} \
      --sjdbFileChrStartEnd ${PASS1_DIR}/${SAMPLE_ID}_SJ.out.tab \
-     --readFilesIn ${INPUT_DIR}${FILE1} ${INPUT_DIR}${FILE2} \
+     --readFilesIn ${READS_IN} \
      --readFilesCommand zcat \
      --outSAMtype BAM SortedByCoordinate \
      --outFileNamePrefix ${PASS2_DIR}/${SAMPLE_ID}_ \
      --outSAMattributes NH HI AS NM MD \
      --outSAMattrRGline ID:${SAMPLE_ID} SM:${SAMPLE_ID} PL:ILLUMINA LB:lib1 PU:unit1
-
-
+ 
 echo -ne "*** STAR pass 2 done! ***"
+ 
+# Sort output PASS2 bam files
+samtools index ${PASS2_DIR}${SAMPLE_ID}_Aligned.sortedByCoord.out.bam
+
+echo -ne "*** Pass 2 bam indexing done! ***"
