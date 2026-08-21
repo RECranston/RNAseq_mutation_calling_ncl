@@ -5,7 +5,7 @@ Here are seven sequential bash scripts to run an end-to-end tumour-only analysis
 The scripts include:  
 * `script1_index_build.sh`:
     * Downloads reference files for GRCh37 and GRCh38. Including files for use with gatk, BQSR, mutect2 and builds indexes/prepares reference files where needed
-    * Creates vep cache
+    * Creates vep caches
     * Builds STAR indexes
 * `script2_trimming.sh`:
     * Trims sequencing adapters from paired fastq.gz files using Trim Galore
