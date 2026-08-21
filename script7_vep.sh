@@ -13,7 +13,7 @@
 
 [ $# -ne 3 ] && { echo -en \
 "\nRuth Cranston 2026\n\n
-*** Script to run vep annotation jobs on a list of sample ids from the original fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
+*** Script to run vep annotation jobs on a list of sample ids from the fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
 Runs in current directory. Input dir is location of rna editing filtered files. Output directory is created.
 <sample sheet> <input dir (relative)> <output dir (relative)>
 example run: sbatch ./script7_vep.sh sample_sheet.txt output_rnaed_filtering/ output_vep/ *** \n\n" ; exit 1; }
@@ -22,11 +22,11 @@ example run: sbatch ./script7_vep.sh sample_sheet.txt output_rnaed_filtering/ ou
 
 # Set variables
 BASE_DIR="$PWD"
-STAR_INDEX_DIR=${BASE_DIR}/"STAR_indexes/STAR_GRCh38"
+ASSEMBLY="GRCh37"
 SAMPLE_SHEET=$1
 INPUT_DIR=${BASE_DIR}/$2
 OUTPUT_DIR=${BASE_DIR}/$3
-REFERENCE_DIR=${BASE_DIR}/"References"
+REFERENCE_DIR=${BASE_DIR}/References/${ASSEMBLY}
 
 
 # Load modules
@@ -40,17 +40,21 @@ set -euo pipefail
 # Remove output dir file if exists
 mkdir -p ${OUTPUT_DIR}
 mkdir -p logs
-mkdir -p ${REFERENCE_DIR}/vep_cache
 
 # Get the correct row for this array task
 LINE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" ${SAMPLE_SHEET})
 
 SAMPLE_ID=$(echo $LINE | awk '{print $1}')
-FILE1=$(echo $LINE | awk '{print $2}')
-FILE2=$(echo $LINE | awk '{print $3}')
 
 echo "Processing sample: ${SAMPLE_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
+
+# Set reference fasta
+if [ "${ASSEMBLY}" == "GRCh38" ]; then
+    REF_FASTA=${REFERENCE_DIR}/Homo_sapiens_assembly38.fasta
+else
+    REF_FASTA=${REFERENCE_DIR}/Homo_sapiens_assembly19.fasta
+fi
 
 # vep annotation of filtered variants
 vep \
@@ -59,10 +63,10 @@ vep \
     --format vcf --vcf \
     --cache --offline \
     --dir_cache ${REFERENCE_DIR}/vep_cache \
-    --assembly GRCh38 \
+    --assembly ${ASSEMBLY} \
     --everything \
     --fork 8 \
-    --fasta ${REFERENCE_DIR}/Homo_sapiens_assembly38.fasta
+    --fasta ${REF_FASTA}
 
 echo -ne "*** vep annotation complete! ***"
 
