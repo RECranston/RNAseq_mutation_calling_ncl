@@ -87,3 +87,4 @@ sample_name  sample1_trimmed.fastq.gz
 ```
 
 * Resulting filtered, vep-annotated mutation data is saved to the defined output directory as `.vcf` files.
+* Utilise the `vcf_conversion.R` script (outlined above) to process vep vcf output files into readable tables for downstream analysis.
