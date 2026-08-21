@@ -29,7 +29,10 @@ The scripts include:
 * `script7_vep.sh`:
     * Annotation of filtered variants by vep.
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
-
+* `vcf_conversion.R`:
+    * R script which converts the vep vcf file output into functional tables for downstream analysis.
+    * Splits out variants which overlap multiple genes into multiple entries (1 row per gene, per alignment).
+    * Path to input tables (vep vcf file output) and path to output directory (to save output tables) to be defined in the script.
   
 ### Setup
 
