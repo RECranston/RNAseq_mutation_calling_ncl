@@ -12,7 +12,9 @@ The scripts include:
     * Hard-code `FORMAT` parameter in the script to `FORMAT=SINGLE_ENDED` for single ended reads, or `FORMAT=PAIRED_END` for paired end reads
     * Runs FastQC
 * `script3_align_twopass.sh`:
-    * Performs STAR two-pass alignment on a paired list of trimmed fastq.gz files
+    * Performs STAR two-pass alignment on a sample list of trimmed fastq.gz files.
+    * Hard-code `FORMAT` parameter in the script to `FORMAT=SINGLE_ENDED` for single ended reads, or `FORMAT=PAIRED_END` for paired end reads
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for alignment to GRCh37 genome build, or `ASSEMBLY=GRCh38` for alignment to GRCh38 genome build
 * `script4_gatk_preprocessing.sh`:
     * Performs gatk preprocessing on named files (names derived from paired fastq.gz file sample sheet)
     * Preprocessing includes: Mark duplicates, Split reads at splice junctions (SplitNCigarReads), Base Quality Score Recalibration (BQSR) model building and application
@@ -49,7 +51,7 @@ sample_name  sample1_L001_R1.fastq.gz  sample1_L001_R2.fastq.gz
 ```
 Single end:
 ```
-sample_name  sample1_L001_R1.fastq.gz
+sample_name  sample1.fastq.gz
 ```
 
 ### Run the pipeline
@@ -64,9 +66,16 @@ Parameters required for each script can be checked by running `./script_name.sh`
 ```
 This can usually be defined by the number of rows in the sample sheet e.g. `cat sample_sheet.txt | wc -l`
 * Run scripts in sequential order.
-* After `script2_trimming.sh` create a new tab delimited sample sheet including paired trimmed fastq files and sample identifiers and save as a `.txt` file.
-* Sample sheet should be three columns including: sample identifier followed by paired files as per the example below:
+* After `script2_trimming.sh` create a new tab delimited sample sheet including trimmed fastq.gz files and sample identifiers and save as a `.txt` file.
+* If paired-end sequencing, the sample sheet of trimmed fastq.gz files should be three columns including sample identifier followed by paired files, if single ended, the sample sheet should be two columns including sample identifier followed by the trimmed fastq.gz file. Examples are shown below:  
+
+Paired end:
 ```
-sample_name  sample1_L001_R1_val_2.fastq.gz sample1_L001_R2_val_2.fastq.gz
+sample_name  sample1_L001_val_1.fastq.gz  sample1_L001_val_2.fastq.gz
 ```
+Single end:
+```
+sample_name  sample1_trimmed.fastq.gz
+```
+
 * Resulting filtered, vep-annotated mutation data is saved to the defined output directory as `.vcf` files.
