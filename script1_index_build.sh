@@ -68,7 +68,7 @@ gcloud config unset project 2>/dev/null || true
 
 # checking if reference files are present - if not then download these
 echo "Detecting if GRCh38 references are present"
-if [[ -d ${REF38}/Homo_sapiens_assembly38.fasta ]];
+if [[ -f ${REF38}/Homo_sapiens_assembly38.fasta ]];
 then
     echo -en " * GRCh38 references already exist in ${REF38}, no need to re-download\n\n"
 else
@@ -155,7 +155,7 @@ fi
 ######################
 
 echo "Detecting if GRCh37 references are present"
-if [[ -d ${REF37}/Homo_sapiens_assembly19.fasta ]];
+if [[ -f ${REF37}/Homo_sapiens_assembly19.fasta ]];
 then
     echo -en " * GRCh37 references already exist in ${REF37}, no need to re-download\n\n"
 else
