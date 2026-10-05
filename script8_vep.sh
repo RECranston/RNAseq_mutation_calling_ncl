@@ -13,7 +13,7 @@
 
 [ $# -ne 3 ] && { echo -en \
 "\nRuth Cranston 2026\n\n
-*** Script to run vep annotation jobs on a list of sample ids from the fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
+*** Script to run vep annotation jobs on a list of sample ids from the original fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
 Runs in current directory. Input dir is location of rna editing filtered files. Output directory is created.
 <sample sheet> <input dir (relative)> <output dir (relative)>
 example run: sbatch ./script7_vep.sh sample_sheet.txt output_rnaed_filtering/ output_vep/ *** \n\n" ; exit 1; }
@@ -45,6 +45,8 @@ mkdir -p logs
 LINE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" ${SAMPLE_SHEET})
 
 SAMPLE_ID=$(echo $LINE | awk '{print $1}')
+FILE1=$(echo $LINE | awk '{print $2}')
+FILE2=$(echo $LINE | awk '{print $3}')
 
 echo "Processing sample: ${SAMPLE_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
