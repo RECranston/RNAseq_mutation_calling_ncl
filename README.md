@@ -21,13 +21,20 @@ The scripts include:
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
 * `script5_gatk_variant_calling.sh`:
     * Performs mutation detection on named files (names derived from sample sheet) using Mutect2 in tumour-only mode, with comparison to the reference genome. Includes `--dont-use-soft-clipped-bases` which is important for excluding alignment noise in RNA-sequencing data.
-    * Considers strand/orientation bias, sample contamination and filters variants accordingly. Also filters for PASS mutations (gatk SelectVariants)
+    * Estimates contamination and applies FilterMutectCalls. Note: the orientation bias model (`--ob-priors`) is intentionally not applied — it produces false positives with strand-specific RNA-sequencing libraries because all reads from a minus-strand gene are F2R1, which the model flags as an artefact.
+    * After filtering, applies rescue-aware variant selection (Python) in place of simple `SelectVariants --exclude-filtered`. Variants with `clustered_events;haplotype` or `germline` filter tags are rescued if they meet validated evidence thresholds (TLOD > 10, and POPAF > 6 for germline-flagged variants). This is necessary because RNA-sequencing depth is substantially lower than DNA sequencing and DNA panel sequencing, causing these filters to fire incorrectly on genuine somatic mutations at hotspot genes.
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome buildd
-* `script6_rna_editing_filter.sh`:
-    * Excludes RNA variants detected in RNA editing sites
+* `script6_merge_phased_variants.sh`:
+    * Merges phased Mutect2 VCF records (sharing a PID tag) that represent a single compound mutation into one minimal variant record.
+    * VEP annotates each VCF record independently and does not combine nearby phased variants (a compound insertion split across three adjacent records can each look like a frameshift individually, when together they form an in-frame event).
+    * Only merges records that are strictly adjacent (next record's position = previous position + length(reference allele)), within a configurable span (`MAX_PHASED_SPAN`, default 10 bp)
+    * Outputs bgzipped and tabix-indexed VCF
+    * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome buildd
+* `script7_rna_editing_filter.sh`:
+    * Excludes variants at known RNA editing sites (A-to-I editing) using REDIportal v3
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
-* `script7_vep.sh`:
-    * Annotation of filtered variants by vep.
+* `script8_vep.sh`:
+    * Annotation of filtered variants by VEP (offline, using local cache)
     * Hard-code `ASSEMBLY` parameter in the script to `ASSEMBLY=GRCh37` for setting reference to GRCh37 genome build, or `ASSEMBLY=GRCh38` for GRCh38 genome build
 * `vcf_conversion.R`:
     * R script which converts the vep vcf file output into functional tables for downstream analysis.
