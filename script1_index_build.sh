@@ -13,13 +13,14 @@
 [ $# -ne 0 ] && { echo -en \
 "\nRuth Cranston 2026\n\n
 *** Script to build RNAseq mutation analysis environment including downloading references and build STAR indexes. 
+Prepared both GRCh38 and GRCh37
 Runs in current directory *** \n\n" ; exit 1; }
 
 # Set variables
 BASE_DIR="$PWD"
 REFERENCE_DIR=${BASE_DIR}/"References"
-REF38=${REFERENCE_DIR}/"GRCh38"
-REF37=${REFERENCE_DIR}/"GRCh37"
+REF38=${REFERENCE_DIR}/GRCh38
+REF37=${REFERENCE_DIR}/GRCh37
 STAR_INDEX_DIR=${BASE_DIR}/"STAR_indexes"
 
 # Load modules
@@ -39,7 +40,8 @@ mkdir -p ${REF37}
 mkdir -p ${STAR_INDEX_DIR}
 mkdir -p logs
 
-# For gcloud CLI compatibility
+
+# Load Python >=3.10 for gcloud CLI compatibility
 export CLOUDSDK_PYTHON=$(which python3)
 
 # install google cloud sdk locally for download of files from google repo
@@ -61,6 +63,7 @@ gsutil --version
 gcloud config set auth/disable_credentials True
 gcloud config unset project 2>/dev/null || true
 
+
 ######################
 ### GRCh38 section ###
 ######################
@@ -68,7 +71,7 @@ gcloud config unset project 2>/dev/null || true
 
 # checking if reference files are present - if not then download these
 echo "Detecting if GRCh38 references are present"
-if [[ -f ${REF38}/Homo_sapiens_assembly38.fasta ]];
+if [[ -d ${REF38}/Homo_sapiens_assembly38.fasta ]];
 then
     echo -en " * GRCh38 references already exist in ${REF38}, no need to re-download\n\n"
 else
@@ -155,7 +158,7 @@ fi
 ######################
 
 echo "Detecting if GRCh37 references are present"
-if [[ -f ${REF37}/Homo_sapiens_assembly19.fasta ]];
+if [[ -d ${REF37}/Homo_sapiens_assembly19.fasta ]];
 then
     echo -en " * GRCh37 references already exist in ${REF37}, no need to re-download\n\n"
 else
