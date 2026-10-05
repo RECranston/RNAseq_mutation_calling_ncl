@@ -13,10 +13,10 @@
 
 [ $# -ne 3 ] && { echo -en \
 "\nRuth Cranston 2026\n\n
-*** Script to run rna editing filter jobs on a list of sample ids from the fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
+*** Script to run rna editing filter jobs on a list of sample ids from the original fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
 Runs in current directory. Input dir is location of mutect2 called and filtered files. Output directory is created.
 <sample sheet> <input dir (relative)> <output dir (relative)>
-example run: sbatch ./script6_rna_editing_filter.sh sample_sheet.txt output_mutation_calling/ output_rnaed_filtering/ *** \n\n" ; exit 1; }
+example run: sbatch ./script7_rna_editing_filter.sh sample_sheet.txt output_merged_phased/ output_rnaed_filtering/ *** \n\n" ; exit 1; }
 
 # --array=1-5%10 means run array job IDs 1-5 with a maximum of 10 running at once
 
@@ -41,17 +41,20 @@ set -euo pipefail
 mkdir -p ${OUTPUT_DIR}
 mkdir -p logs
 
+
 # Get the correct row for this array task
 LINE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" ${SAMPLE_SHEET})
 
 SAMPLE_ID=$(echo $LINE | awk '{print $1}')
+FILE1=$(echo $LINE | awk '{print $2}')
+FILE2=$(echo $LINE | awk '{print $3}')
 
 echo "Processing sample: ${SAMPLE_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
 
 # Convert to exclude known RNA editing sites
 bedtools intersect \
-    -a ${INPUT_DIR}${SAMPLE_ID}_tumor_filtered_PASS.vcf.gz \
+    -a ${INPUT_DIR}${SAMPLE_ID}_tumor_filtered_PASS_merged.vcf.gz \
     -b ${REFERENCE_DIR}/REDIportal_${ASSEMBLY}.bed \
     -sorted \
     -g ${REFERENCE_DIR}/${ASSEMBLY}.genome \
