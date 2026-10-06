@@ -16,7 +16,7 @@
 *** Script to run vep annotation jobs on a list of sample ids from the original fastq file sample sheet [sample name] [fastq1] [fastq2] (tab delimited sheet). 
 Runs in current directory. Input dir is location of rna editing filtered files. Output directory is created.
 <sample sheet> <input dir (relative)> <output dir (relative)>
-example run: sbatch ./script7_vep.sh sample_sheet.txt output_rnaed_filtering/ output_vep/ *** \n\n" ; exit 1; }
+example run: sbatch ./script8_vep.sh sample_sheet.txt output_rnaed_filtering/ output_vep/ *** \n\n" ; exit 1; }
 
 # --array=1-5%10 means run array job IDs 1-5 with a maximum of 10 running at once
 
